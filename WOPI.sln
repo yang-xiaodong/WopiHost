@@ -44,7 +44,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WopiHost.Core", "src\WopiHo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WopiHost.Cobalt", "src\WopiHost.Cobalt\WopiHost.Cobalt.csproj", "{5195E64C-B991-4B1F-BC5C-8DA3281CB559}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WopiHost.Core.Tests", "test\WopiHost.Core.Tests\WopiHost.Core.Tests.csproj", "{9CBB4AD4-EAE4-4D85-A70C-ECC465DA3D86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WopiHost.Core.Tests", "test\WopiHost.Core.Tests\WopiHost.Core.Tests.csproj", "{9CBB4AD4-EAE4-4D85-A70C-ECC465DA3D86}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WopiHost.FileS3Provider", "src\WopiHost.FileS3Provider\WopiHost.FileS3Provider.csproj", "{461AA47F-5907-4CBC-9A83-0559C14819A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -150,6 +152,14 @@ Global
 		{9CBB4AD4-EAE4-4D85-A70C-ECC465DA3D86}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9CBB4AD4-EAE4-4D85-A70C-ECC465DA3D86}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{9CBB4AD4-EAE4-4D85-A70C-ECC465DA3D86}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{461AA47F-5907-4CBC-9A83-0559C14819A1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

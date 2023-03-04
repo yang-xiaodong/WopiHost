@@ -1,6 +1,7 @@
+using Microsoft.Extensions.Options;
 using WopiHost.Abstractions;
 using WopiHost.Discovery;
-using WopiHost.FileSystemProvider;
+using WopiHost.FileS3Provider;
 using WopiHost.Web.Models;
 
 namespace WopiHost.Web;
@@ -19,8 +20,7 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddControllersWithViews()
-            .AddRazorRuntimeCompilation(); // Add browser link
+        services.AddControllersWithViews();
         services.AddSingleton(Configuration);
 
         // Configuration
@@ -32,9 +32,10 @@ public class Startup
             client.BaseAddress = new Uri(Configuration[$"{WopiConfigurationSections.WOPI_ROOT}:{nameof(WopiOptions.ClientUrl)}"]);
         });
         services.Configure<DiscoveryOptions>(Configuration.GetSection($"{WopiConfigurationSections.DISCOEVRY_OPTIONS}"));
-        services.AddSingleton<IDiscoverer, WopiDiscoverer>();
+        services.AddSingleton(x => x.GetRequiredService<IOptions<DiscoveryOptions>>().Value);
 
-        services.AddScoped<IWopiStorageProvider, WopiFileSystemProvider>();
+        services.AddSingleton<IDiscoverer, WopiDiscoverer>();
+        services.AddScoped<IWopiStorageProvider, WopiFileS3Provider>();
 
         services.AddLogging(loggingBuilder =>
         {

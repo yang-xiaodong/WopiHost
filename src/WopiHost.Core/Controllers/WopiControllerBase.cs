@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using WopiHost.Abstractions;
-using WopiHost.Core.Models;
 using WopiHost.Core.Security.Authentication;
 
 namespace WopiHost.Core.Controllers;
@@ -20,12 +18,7 @@ public abstract class WopiControllerBase : ControllerBase
     /// <summary>
     /// Provides security-related actions.
     /// </summary>
-    protected IWopiSecurityHandler SecurityHandler { get; }
-
-    /// <summary>
-    /// WOPI Host configuration object.
-    /// </summary>
-    protected IOptionsSnapshot<WopiHostOptions> WopiHostOptions { get; }
+    protected IWopiSecurityHandler SecurityHandler { get; } 
 
     /// <summary>
     /// WOPI Host base URL
@@ -50,12 +43,10 @@ public abstract class WopiControllerBase : ControllerBase
     /// </summary>
     /// <param name="storageProvider">Object facilitating access to the storage of WOPI files.</param>
     /// <param name="securityHandler">Object facilitating security-related actions.</param>
-    /// <param name="wopiHostOptions">WOPI Host configuration object</param>
-    protected WopiControllerBase(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler, IOptionsSnapshot<WopiHostOptions> wopiHostOptions)
+    protected WopiControllerBase(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler)
     {
         StorageProvider = storageProvider;
         SecurityHandler = securityHandler;
-        WopiHostOptions = wopiHostOptions;
     }
 
     /// <summary>

@@ -1,6 +1,5 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.Versioning;
+﻿using System.Runtime.Versioning;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using WopiHost.Abstractions;
 
@@ -11,13 +10,9 @@ public class WopiFile : IWopiFile
 {
     private FileInfo _fileInfo;
 
-    private FileVersionInfo _fileVersionInfo;
-
     private string FilePath { get; set; }
 
     private FileInfo FileInfo => _fileInfo ??= new FileInfo(FilePath);
-
-    private FileVersionInfo FileVersionInfo => _fileVersionInfo ??= FileVersionInfo.GetVersionInfo(FilePath);
 
     /// <inheritdoc/>
     public string Identifier { get; }
@@ -39,11 +34,18 @@ public class WopiFile : IWopiFile
         }
     }
 
-    /// <inheritdoc/>
-    public string Version => FileVersionInfo.FileVersion ?? FileInfo.LastWriteTimeUtc.ToString(CultureInfo.InvariantCulture);
+    private static readonly SHA256 Sha = SHA256.Create();
 
     /// <inheritdoc/>
-    public long Size => FileInfo.Length;
+    public string Sha256
+    {
+        get
+        {
+            using var stream = FileInfo.OpenRead();
+            var checksum = Sha.ComputeHash(stream);
+            return Convert.ToBase64String(checksum);
+        }
+    }
 
     /// <inheritdoc/>
     public long Length => FileInfo.Length;
@@ -64,19 +66,7 @@ public class WopiFile : IWopiFile
         FilePath = filePath;
         Identifier = fileIdentifier;
     }
-
-    /// <inheritdoc/>
-    public Stream GetReadStream()
-    {
-        return FileInfo.OpenRead();
-    }
-
-    /// <inheritdoc/>
-    public Stream GetWriteStream()
-    {
-        return FileInfo.Open(FileMode.Truncate);
-    }
-
+    
     /// <summary>
     /// A string that uniquely identifies the owner of the file.
     /// Supported only on Windows and Linux.

@@ -13,8 +13,8 @@ public class AccessTokenAuthenticationOptions : AuthenticationSchemeOptions
     /// </summary>
     public bool SaveToken { get; set; } = true;
 
-    /// <summary>
-    /// Performs AuthNZ operations. 
-    /// </summary>
-    public IWopiSecurityHandler SecurityHandler { get; set; }
+    ///// <summary>
+    ///// Performs AuthNZ operations. 
+    ///// </summary>
+    //public IWopiSecurityHandler SecurityHandler { get; set; }
 }

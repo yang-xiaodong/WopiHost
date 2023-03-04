@@ -2,19 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <IncludeOpenAPIAnalyzers>true</IncludeOpenAPIAnalyzers>
-    <PreserveCompilationContext>true</PreserveCompilationContext>
-    <AssemblyName>WopiHost.Web</AssemblyName>
-    <OutputType>Exe</OutputType>
-    <PackageId>WopiHost.Web</PackageId>
-    <UserSecretsId>aspnet5-SampleWeb-20150906061332</UserSecretsId>
-    <PublishReadyToRun>true</PublishReadyToRun>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.0" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Update="wwwroot\**\*;Views\**\*;Areas\**\Views">
@@ -23,15 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WopiHost.FileSystemProvider\WopiHost.FileSystemProvider.csproj" />
+    <ProjectReference Include="..\WopiHost.FileS3Provider\WopiHost.FileS3Provider.csproj" />
     <ProjectReference Include="..\WopiHost.Url\WopiHost.Url.csproj" />
-  </ItemGroup>
-
-  <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
-    <Exec Command="npm install" />
-    <Exec Command="bower install" />
-    <Exec Command="gulp clean" />
-    <Exec Command="gulp min" />
-  </Target>
+  </ItemGroup> 
 
 </Project>

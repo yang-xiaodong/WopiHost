@@ -1,6 +1,5 @@
 ﻿using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using WopiHost.Abstractions;
 using WopiHost.Core.Models;
@@ -15,13 +14,12 @@ namespace WopiHost.Core.Controllers;
 public class WopiBootstrapperController : WopiControllerBase
 {
     /// <summary>
-		/// Creates an instance of <see cref="WopiBootstrapperController"/>.
+    /// Creates an instance of <see cref="WopiBootstrapperController"/>.
     /// </summary>
     /// <param name="storageProvider">Storage provider instance for retrieving files and folders.</param>
     /// <param name="securityHandler">Security handler instance for performing security-related operations.</param>
-    /// <param name="wopiHostOptions">WOPI Host configuration</param>
-    public WopiBootstrapperController(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler, IOptionsSnapshot<WopiHostOptions> wopiHostOptions)
-        : base(storageProvider, securityHandler, wopiHostOptions)
+    public WopiBootstrapperController(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler)
+        : base(storageProvider, securityHandler)
     {
     }
 

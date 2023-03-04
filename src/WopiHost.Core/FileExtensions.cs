@@ -74,11 +74,13 @@ public static class FileExtensions
         checkFileInfo.SupportsUserInfo = capabilities.SupportsUserInfo;
         checkFileInfo.SupportsFileCreation = capabilities.SupportsFileCreation;
 
-        using (var stream = file.GetReadStream())
-        {
-            var checksum = Sha.ComputeHash(stream);
-            checkFileInfo.Sha256 = Convert.ToBase64String(checksum);
-        }
+        //using (var stream = file.GetReadStream())
+        //{
+        //    var checksum = Sha.ComputeHash(stream);
+        //    checkFileInfo.Sha256 = Convert.ToBase64String(checksum);
+        //}
+
+        checkFileInfo.Sha256 = file.Sha256;
         checkFileInfo.BaseFileName = file.Name;
         checkFileInfo.FileExtension = "." + file.Extension.TrimStart('.');
         checkFileInfo.Version = file.LastWriteTimeUtc.ToString("s", CultureInfo.InvariantCulture);

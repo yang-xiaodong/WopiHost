@@ -1,44 +1,25 @@
-﻿using Autofac.Extensions.DependencyInjection;
-using Serilog;
-using Serilog.Events;
+﻿using WopiHost.Abstractions;
+using WopiHost.Core;
+using WopiHost.Core.Controllers;
+using WopiHost.Core.Models;
+using WopiHost.FileS3Provider;
 
-namespace WopiHost;
+var builder = WebApplication.CreateBuilder(args);
 
-public static class Program
-{
-    public static int Main(string[] args)
-    {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.Debug()
-            .CreateLogger();
+builder.Services.AddSingleton<IWopiSecurityHandler, WopiSecurityHandler>();
+builder.Services.AddSingleton<IWopiStorageProvider, WopiFileS3Provider>();
+builder.Services.AddSingleton<IDictionary<string, LockInfo>>(d => new Dictionary<string, LockInfo>());
 
-        try
-        {
-            Log.Information("Starting WOPI host");
-            CreateHostBuilder(args).Build().Run();
-            return 0;
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "WOPI Host terminated unexpectedly");
-            return 1;
-        }
-        finally
-        {
-            Log.CloseAndFlush();
-        }
-    }
+ 
+// Configuration
+builder.Services.AddOptions();
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args).UseSerilog()
-            .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-            .UseContentRoot(Directory.GetCurrentDirectory())
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
-}
+builder.Services.AddWopi();
+
+builder.Services.AddControllers().AddApplicationPart(typeof(FilesController).Assembly);
+
+var app = builder.Build();
+
+app.UseAuthentication();
+app.MapControllers();
+app.Run();

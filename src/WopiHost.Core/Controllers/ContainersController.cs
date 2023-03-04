@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using WopiHost.Abstractions;
 using WopiHost.Core.Models;
 
@@ -18,8 +17,7 @@ public class ContainersController : WopiControllerBase
     /// </summary>
     /// <param name="storageProvider">Storage provider instance for retrieving files and folders.</param>
     /// <param name="securityHandler">Security handler instance for performing security-related operations.</param>
-    /// <param name="wopiHostOptions">WOPI Host configuration</param>
-    public ContainersController(IOptionsSnapshot<WopiHostOptions> wopiHostOptions, IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler) : base(storageProvider, securityHandler, wopiHostOptions)
+    public ContainersController(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler) : base(storageProvider, securityHandler)
     {
     }
 
@@ -32,9 +30,9 @@ public class ContainersController : WopiControllerBase
     /// <returns></returns>
     [HttpGet("{id}")]
     [Produces(MediaTypeNames.Application.Json)]
-    public CheckContainerInfo GetCheckContainerInfo(string id)
+    public async Task<CheckContainerInfo> GetCheckContainerInfo(string id)
     {
-        var container = StorageProvider.GetWopiContainer(id);
+        var container =await StorageProvider.GetWopiContainer(id);
         return new CheckContainerInfo
         {
             Name = container.Name
@@ -50,25 +48,25 @@ public class ContainersController : WopiControllerBase
     /// <returns></returns>
     [HttpGet("{id}/children")]
     [Produces(MediaTypeNames.Application.Json)]
-    public Container EnumerateChildren(string id)
+    public async Task<Container> EnumerateChildren(string id)
     {
         var container = new Container();
         var files = new List<ChildFile>();
         var containers = new List<ChildContainer>();
 
-        foreach (var wopiFile in StorageProvider.GetWopiFiles(id))
+        foreach (var wopiFile in await StorageProvider.GetWopiFiles(id))
         {
             files.Add(new ChildFile
             {
                 Name = wopiFile.Name,
                 Url = GetWopiUrl("files", wopiFile.Identifier, AccessToken),
                 LastModifiedTime = wopiFile.LastWriteTimeUtc.ToString("o", CultureInfo.InvariantCulture),
-                Size = wopiFile.Size,
-                Version = wopiFile.Version
+                Size = wopiFile.Length,
+                Version = wopiFile.LastWriteTimeUtc.ToString("s", CultureInfo.InvariantCulture)
             });
         }
 
-        foreach (var wopiContainer in StorageProvider.GetWopiContainers(id))
+        foreach (var wopiContainer in await StorageProvider.GetWopiContainers(id))
         {
             containers.Add(new ChildContainer
             {

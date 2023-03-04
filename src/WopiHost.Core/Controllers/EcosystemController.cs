@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Net.Mime;
 using WopiHost.Abstractions;
 using WopiHost.Core.Models;
@@ -12,14 +11,13 @@ namespace WopiHost.Core.Controllers;
 [Route("wopi/[controller]")]
 	public class EcosystemController : WopiControllerBase
 	{
-		/// <summary>
-		/// Creates an instance of <see cref="EcosystemController"/>.
-		/// </summary>
-		/// <param name="storageProvider">Storage provider instance for retrieving files and folders.</param>
-		/// <param name="securityHandler">Security handler instance for performing security-related operations.</param>
-		/// <param name="wopiHostOptions">WOPI Host configuration</param>
-		public EcosystemController(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler, IOptionsSnapshot<WopiHostOptions> wopiHostOptions) 
-        : base(storageProvider, securityHandler, wopiHostOptions)
+        /// <summary>
+        /// Creates an instance of <see cref="EcosystemController"/>.
+        /// </summary>
+        /// <param name="storageProvider">Storage provider instance for retrieving files and folders.</param>
+        /// <param name="securityHandler">Security handler instance for performing security-related operations.</param>
+        public EcosystemController(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler) 
+        : base(storageProvider, securityHandler)
 		{
 		}
 
@@ -31,9 +29,9 @@ namespace WopiHost.Core.Controllers;
 		/// <returns></returns>
 		[HttpGet("root_container_pointer")]
 		[Produces(MediaTypeNames.Application.Json)]
-		public RootContainerInfo GetRootContainer() //TODO: fix the path
+		public async Task<RootContainerInfo> GetRootContainer() //TODO: fix the path
 		{
-			var root = StorageProvider.GetWopiContainer(@".\");
+			var root =await StorageProvider.GetWopiContainer(@".\");
 			var rc = new RootContainerInfo
 			{
 				ContainerPointer = new ChildContainer

@@ -4,9 +4,9 @@ using WopiHost.Discovery;
 using WopiHost.Discovery.Enumerations;
 using WopiHost.Url;
 using WopiHost.Abstractions;
-using WopiHost.FileSystemProvider;
 using WopiHost.Web.Models;
 using Microsoft.Extensions.Options;
+using WopiHost.FileS3Provider;
 
 namespace WopiHost.Web.Controllers;
 
@@ -21,7 +21,7 @@ public class HomeController : Controller
 
 
     //TODO: remove test culture value and load it from configuration SECTION
-    public WopiUrlBuilder UrlGenerator => _urlGenerator ??= new WopiUrlBuilder(Discoverer, new WopiUrlSettings { UiLlcc = new CultureInfo("en-US") });
+    public WopiUrlBuilder UrlGenerator => _urlGenerator ??= new WopiUrlBuilder(Discoverer, new WopiUrlSettings { UiLlcc = new CultureInfo("zh-CN") });
 
     public HomeController(IOptionsSnapshot<WopiOptions> wopiOptions, IWopiStorageProvider storageProvider, IDiscoverer discoverer, ILoggerFactory loggerFactory)
     {
@@ -31,11 +31,12 @@ public class HomeController : Controller
         LoggerFactory = loggerFactory;
     }
 
+    [HttpGet]
     public async Task<ActionResult> Index()
     {
         try
         {
-            var files = StorageProvider.GetWopiFiles(StorageProvider.RootContainerPointer.Identifier);
+            var files = await StorageProvider.GetWopiFiles(StorageProvider.RootContainerPointer.Identifier);
             var fileViewModels = new List<FileViewModel>();
             foreach (var file in files)
             {
@@ -60,12 +61,13 @@ public class HomeController : Controller
         }
     }
 
+    [HttpGet("[action]")]
     public async Task<ActionResult> Detail(string id, string wopiAction)
     {
         var actionEnum = Enum.Parse<WopiActionEnum>(wopiAction);
         var securityHandler = new WopiSecurityHandler(LoggerFactory); //TODO: via DI
 
-        var file = StorageProvider.GetWopiFile(id);
+        var file = await StorageProvider.GetWopiFile(id);
         var token = securityHandler.GenerateAccessToken("Anonymous", file.Identifier);
 
 

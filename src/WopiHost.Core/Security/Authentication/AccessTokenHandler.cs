@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using WopiHost.Abstractions;
 
 namespace WopiHost.Core.Security.Authentication;
 
@@ -11,6 +12,19 @@ namespace WopiHost.Core.Security.Authentication;
 /// </summary>
 public class AccessTokenHandler : AuthenticationHandler<AccessTokenAuthenticationOptions>
 {
+    private readonly IWopiSecurityHandler _securityHandler;
+
+    /// <summary>
+    /// Init
+    /// </summary> 
+    public AccessTokenHandler(IOptionsMonitor<AccessTokenAuthenticationOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder,
+        ISystemClock clock, IWopiSecurityHandler securityHandler) : base(options, logger, encoder, clock)
+    {
+        _securityHandler = securityHandler;
+    }
+
     /// <summary>
     /// Handles authentication using the access_token query parameter.
     /// </summary>
@@ -27,12 +41,12 @@ public class AccessTokenHandler : AuthenticationHandler<AccessTokenAuthenticatio
             {
                 //TODO: Implement properly: https://learn.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/rest/bootstrapper/bootstrap
                 //Should be removed or replaced with bearer token check
-                token = Options.SecurityHandler.WriteToken(Options.SecurityHandler.GenerateAccessToken("Anonymous", Convert.ToBase64String(Encoding.UTF8.GetBytes(".\\"))));
+                token = _securityHandler.WriteToken(_securityHandler.GenerateAccessToken("Anonymous", Convert.ToBase64String(Encoding.UTF8.GetBytes(".\\"))));
             }
 
             if (!string.IsNullOrEmpty(token))
             {
-                var principal = Options.SecurityHandler.GetPrincipal(token);
+                var principal = _securityHandler.GetPrincipal(token);
 
                 if (principal != null)
                 {

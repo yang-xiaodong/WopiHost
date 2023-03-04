@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using WopiHost.Abstractions;
 using WopiHost.Core.Models;
 using WopiHost.Core.Results;
@@ -50,11 +49,10 @@ public class FilesController : WopiControllerBase
     /// </summary>
     /// <param name="storageProvider">Storage provider instance for retrieving files and folders.</param>
     /// <param name="securityHandler">Security handler instance for performing security-related operations.</param>
-    /// <param name="wopiHostOptions">WOPI Host configuration</param>
     /// <param name="authorizationService">An instance of authorization service capable of resource-based authorization.</param>
     /// <param name="lockStorage">An instance of a storage for lock information.</param>
     /// <param name="cobaltProcessor">An instance of a MS-FSSHTTP processor.</param>
-    public FilesController(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler, IOptionsSnapshot<WopiHostOptions> wopiHostOptions, IAuthorizationService authorizationService, IDictionary<string, LockInfo> lockStorage, ICobaltProcessor cobaltProcessor = null) : base(storageProvider, securityHandler, wopiHostOptions)
+    public FilesController(IWopiStorageProvider storageProvider, IWopiSecurityHandler securityHandler, IAuthorizationService authorizationService, IDictionary<string, LockInfo> lockStorage, ICobaltProcessor cobaltProcessor = null) : base(storageProvider, securityHandler)
     {
         _authorizationService = authorizationService;
         _lockStorage = lockStorage;
@@ -75,7 +73,9 @@ public class FilesController : WopiControllerBase
         {
             return Unauthorized();
         }
-        return new JsonResult(StorageProvider.GetWopiFile(id)?.GetCheckFileInfo(User, HostCapabilities), null);
+
+        var file = await StorageProvider.GetWopiFile(id);
+        return new JsonResult(file?.GetCheckFileInfo(User, HostCapabilities), null);
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class FilesController : WopiControllerBase
         }
 
         // Get file
-        var file = StorageProvider.GetWopiFile(id);
+        var file = await StorageProvider.GetWopiFile(id);
 
         // Check expected size
         var maximumExpectedSize = HttpContext.Request.Headers[WopiHeaders.MAX_EXPECTED_SIZE].ToString().ToNullableInt();
@@ -105,7 +105,7 @@ public class FilesController : WopiControllerBase
         }
 
         // Try to read content from a stream
-        return new FileStreamResult(file.GetReadStream(), "application/octet-stream");
+        return new FileStreamResult(await StorageProvider.GetWopiFileStream(id), "application/octet-stream");
     }
 
     /// <summary>
@@ -133,14 +133,21 @@ public class FilesController : WopiControllerBase
         if (lockResult is OkResult)
         {
             // Get file
-            var file = StorageProvider.GetWopiFile(id);
+            var file = await StorageProvider.GetWopiFile(id);
 
             // Save file contents
-            var newContent = await HttpContext.Request.Body.ReadBytesAsync();
-            await using (var stream = file.GetWriteStream())
-            {
-                await stream.WriteAsync(newContent.AsMemory(0, newContent.Length));
-            }
+            //var newContent = await HttpContext.Request.Body.ReadBytesAsync();
+            //await using (var stream = file.GetWriteStream())
+            //{
+            //    await stream.WriteAsync(newContent.AsMemory(0, newContent.Length));
+            //}
+            //TODO:Savorboard
+
+            var fileStream = new MemoryStream();
+
+            await HttpContext.Request.Body.CopyToAsync(fileStream);
+
+            await StorageProvider.PutWopiFile(file.Identifier, fileStream);
 
             return new OkResult();
         }
@@ -179,7 +186,7 @@ public class FilesController : WopiControllerBase
             return Unauthorized();
         }
 
-        var file = StorageProvider.GetWopiFile(id);
+        var file = await StorageProvider.GetWopiFile(id);
 
         // TODO: remove workaround https://github.com/aspnet/Announcements/issues/342 (use FileBufferingWriteStream)
         var syncIoFeature = HttpContext.Features.Get<IHttpBodyControlFeature>();

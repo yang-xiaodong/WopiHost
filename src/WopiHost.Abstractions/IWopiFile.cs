@@ -41,22 +41,17 @@ public interface IWopiFile
     string Extension { get; }
 
     /// <summary>
-    /// Version of the file.
+    /// Hash of the file
     /// </summary>
-    string Version { get; }
+    string Sha256 { get; }
 
-    /// <summary>
-    /// Size of the file.
-    /// </summary>
-    long Size { get; }
+    ///// <summary>
+    ///// Gets read-only stream.
+    ///// </summary>
+    //Stream GetReadStream();
 
-    /// <summary>
-    /// Gets read-only stream.
-    /// </summary>
-    Stream GetReadStream();
-
-    /// <summary>
-    /// Gets r/w stream.
-    /// </summary>
-    Stream GetWriteStream();
+    ///// <summary>
+    ///// Gets r/w stream.
+    ///// </summary>
+    ////Stream GetWriteStream();
 }

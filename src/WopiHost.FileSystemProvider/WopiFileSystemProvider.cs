@@ -48,27 +48,27 @@ public class WopiFileSystemProvider : IWopiStorageProvider
     /// Gets a file using an identifier.
     /// </summary>
     /// <param name="identifier">A base64-encoded file path.</param>
-    public IWopiFile GetWopiFile(string identifier)
+    public Task<IWopiFile> GetWopiFile(string identifier)
     {
         var filePath = DecodeIdentifier(identifier);
-        return new WopiFile(Path.Combine(WopiAbsolutePath, filePath), identifier);
+        return Task.FromResult<IWopiFile>(new WopiFile(Path.Combine(WopiAbsolutePath, filePath), identifier));
     }
 
     /// <summary>
     /// Gets a folder using an identifier.
     /// </summary>
     /// <param name="identifier">A base64-encoded folder path.</param>
-    public IWopiFolder GetWopiContainer(string identifier = "")
+    public Task<IWopiFolder> GetWopiContainer(string identifier = "")
     {
         var folderPath = DecodeIdentifier(identifier);
-        return new WopiFolder(Path.Combine(WopiAbsolutePath, folderPath), identifier);
+        return Task.FromResult<IWopiFolder>(new WopiFolder(Path.Combine(WopiAbsolutePath, folderPath), identifier));
     }
 
     /// <summary>
     /// Gets all files in a folder.
     /// </summary>
     /// <param name="identifier">A base64-encoded folder path.</param>
-    public List<IWopiFile> GetWopiFiles(string identifier = "")
+    public async Task<List<IWopiFile>> GetWopiFiles(string identifier = "")
     {
         var folderPath = DecodeIdentifier(identifier);
         var files = new List<IWopiFile>();
@@ -76,7 +76,7 @@ public class WopiFileSystemProvider : IWopiStorageProvider
         {
             var filePath = Path.Combine(folderPath, Path.GetFileName(path));
             var fileId = EncodeIdentifier(filePath);
-            files.Add(GetWopiFile(fileId));
+            files.Add(await GetWopiFile(fileId));
         }
         return files;
     }
@@ -85,7 +85,7 @@ public class WopiFileSystemProvider : IWopiStorageProvider
     /// Gets all sub-folders of a folder.
     /// </summary>
     /// <param name="identifier">A base64-encoded folder path.</param>
-    public List<IWopiFolder> GetWopiContainers(string identifier = "")
+    public async Task<List<IWopiFolder>> GetWopiContainers(string identifier = "")
     {
         var folderPath = DecodeIdentifier(identifier);
         var folders = new List<IWopiFolder>();
@@ -93,9 +93,31 @@ public class WopiFileSystemProvider : IWopiStorageProvider
         {
             var subfolderPath = "." + directory.Remove(0, directory.LastIndexOf(Path.DirectorySeparatorChar));
             var folderId = EncodeIdentifier(subfolderPath);
-            folders.Add(GetWopiContainer(folderId));
+            folders.Add(await GetWopiContainer(folderId));
         }
         return folders;
+    }
+
+    /// <summary>
+    /// Put the file to container
+    /// </summary>
+    public async Task PutWopiFile(string identifier, Stream stream)
+    {
+        var filePath = DecodeIdentifier(identifier);
+        var putPath = Path.Combine(WopiAbsolutePath, filePath);
+        await using var fs = new FileInfo(putPath).Open(FileMode.Truncate);
+        await stream.CopyToAsync(fs);
+        fs.Close();
+    }
+
+    /// <summary>
+    /// Get file stream
+    /// </summary>
+    public Task<Stream> GetWopiFileStream(string identifier)
+    {
+        var filePath = DecodeIdentifier(identifier);
+        var putPath = Path.Combine(WopiAbsolutePath, filePath);
+        return Task.FromResult((Stream)new FileInfo(putPath).OpenRead());
     }
 
     private static string DecodeIdentifier(string identifier)
